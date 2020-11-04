@@ -6,4 +6,4 @@
 | <img src ="https://github.com/Coder481/CDN/blob/main/RecycleCart/home_pg.jpg" width="250" height="500" /> | <img src="https://github.com/Coder481/CDN/blob/main/RecycleCart/icrs_qty.jpg" width="250" height="500"/>|<img src="https://github.com/Coder481/CDN/blob/main/RecycleCart/more_itms.jpg" width="250" height="500"/>
 
 
-#### Download the APK  [here](https://github.com/Coder481/RecycleCart/releases/download/Latest/recycleCart.apk)
+#### Download the APK 
