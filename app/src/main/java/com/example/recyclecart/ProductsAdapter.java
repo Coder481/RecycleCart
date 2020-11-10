@@ -14,6 +14,7 @@ import com.example.recyclecart.databinding.VariantBasedProductBinding;
 import com.example.recyclecart.databinding.WeightBasedProductBinding;
 import com.example.recyclecart.models.Product;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // Adapter for List of Products
@@ -23,13 +24,15 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private Context context;
 
     // List of Data
-    private List<Product> productList;
+    public List<Product> allProducts, visibleProducts;
+
 
     int lastSelectedItemPosition;
 
-    public ProductsAdapter(Context context , List<Product> productList){
+    public ProductsAdapter(Context context , List<Product> products){
         this.context = context;
-        this.productList = productList;
+        allProducts=products;
+        this.visibleProducts = new ArrayList<>(products);
     }
 
     // Inflate the view for item and create a ViewHolder object based on ViewType( View to Java Code)
@@ -64,7 +67,7 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     // Return ViewType Based on position
     @Override
     public int getItemViewType(int position) {
-        return productList.get(position).type;
+        return visibleProducts.get(position).type;
     }
 
 
@@ -73,7 +76,7 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
         // Get the data at position
-        final Product product = productList.get(position);
+        final Product product = visibleProducts.get(position);
 
         if (product.type == Product.WEIGHT_BASED){
             //Get Binding
@@ -87,7 +90,8 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             // Setup Contextual Menu inflation
             setupContextMenu(b.getRoot());
 
-        }else{
+        }
+        else{
             // Get Binding
             VariantBasedProductBinding b = ((VariantBasedProductViewHolder) holder).b;
 
@@ -126,7 +130,7 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     // Recycler View get to know how many Data are there to bind
     @Override
     public int getItemCount() {
-        return productList.size();
+        return visibleProducts.size();
     }
 
 
@@ -140,6 +144,7 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     }
 
+
     // ViewHolder for Variant Based Product
     public static class  VariantBasedProductViewHolder extends RecyclerView.ViewHolder {
         VariantBasedProductBinding b ;
@@ -147,5 +152,19 @@ public class ProductsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super(b.getRoot());
             this.b=b;
         }
+    }
+
+
+    // Filter method for filtering the Query asked in Search View (method call in Catalog Activity)
+    public void filter(String query) {
+        // query.toLowerCase()="app"    product.name.toLowerCase()="apple"    searchResult="Apple"
+        query = query.toLowerCase();
+        visibleProducts = new ArrayList<>();
+
+        for(Product p : allProducts) {
+            if (p.name.toLowerCase().contains(query))
+                visibleProducts.add(p);
+        }
+        notifyDataSetChanged();
     }
 }

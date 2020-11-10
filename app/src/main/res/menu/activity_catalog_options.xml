@@ -6,5 +6,18 @@
         android:title="add"
         android:id="@+id/add_btn"
         app:showAsAction="always"
+        android:orderInCategory="20"
         android:icon="@drawable/ic_increment"/>
+
+    <item
+        android:title="search"
+        android:id="@+id/search_btn"
+        app:showAsAction="always"
+        android:orderInCategory="10"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        android:icon="@drawable/ic_search"/>
+
+    <item
+        android:title="Weight Picker"
+        android:id="@+id/weigth_picker"/>
 </menu>

@@ -19,13 +19,19 @@ import static com.example.recyclecart.models.Product.WEIGHT_BASED;
 public class ProductEditorDialog {
 
     private DialogProductEditBinding b;
-    private Product product;
+    public Product product;
+
+    public static final byte PRODUCT_ADD =0 , PRODUCT_EDIT =1;
+    byte whyProduct;
+    public ProductEditorDialog(byte type){
+        whyProduct = type;
+    }
 
     void show(final Context context, final Product product, final OnProductEditedListener listener){
 
         // Inflate
         b = DialogProductEditBinding.inflate(LayoutInflater.from(context));
-        this.product = product;
+
 
         // Show Dialog when OptionsMenu (+) button is clicked
         new AlertDialog.Builder(context)
@@ -34,7 +40,7 @@ public class ProductEditorDialog {
                 .setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (areProductDetailsValid())
+                        if (areProductDetailsValid(whyProduct))
                             listener.onProductEdited(ProductEditorDialog.this.product);
 
                         else
@@ -50,8 +56,9 @@ public class ProductEditorDialog {
                 .show();
 
         setupRadioButton();
-        preFillPreviousDetails();
-
+        if(whyProduct==PRODUCT_EDIT){
+            preFillPreviousDetails();
+        }
     }
 
     // Show previously filled details when Edit button (in contextual Menu) is clicked
@@ -75,6 +82,8 @@ public class ProductEditorDialog {
 
     // Set visibility of either Variants or WeightBased
     private void setupRadioButton() {
+        b.productType.clearCheck();
+
         b.productType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -92,20 +101,18 @@ public class ProductEditorDialog {
     }
 
     // Check for Product Details Validation
-    private boolean areProductDetailsValid() {
+    private boolean areProductDetailsValid(byte type) {
         // checking for name
         String name = b.name.getText().toString().trim();
         if (name.isEmpty())
             return false;
 
         // Set name to product
-        product.name=name;
+        //product.name=name;
 
 
         switch(b.productType.getCheckedRadioButtonId()){
             case R.id.weightBasedRadioBtn:
-                // Set type
-                product.type=WEIGHT_BASED;
 
                 // Get Values from Views
                 String pricePerKg = b.pricePerKgEditText.getText().toString().trim()
@@ -115,10 +122,13 @@ public class ProductEditorDialog {
                     return false;
 
                 // If All Good,set Values to the product
-                product = new Product(name
-                        ,Integer.parseInt(pricePerKg)
-                        ,extractMinQtyFromString(minQty));
-
+                if(type == PRODUCT_EDIT){
+                    product.initWeightBasedProduct(name
+                            ,Integer.parseInt(pricePerKg)
+                            ,extractMinQtyFromString(minQty));
+                    return true;
+                }
+                product = new Product(name,Integer.parseInt(pricePerKg),extractMinQtyFromString(minQty));
                 return true;
 
             case R.id.variantBasedRadioBtn:
@@ -126,7 +136,11 @@ public class ProductEditorDialog {
                 // Get Values from views
                 String variants = b.variantsEditText.getText().toString().trim();
 
-                product = new Product(name);
+                if(type == PRODUCT_ADD){
+                    product = new Product(name);
+                }else{
+                    product.initVarientBasedProduct(name);
+                }
                 return areVariantsValid(variants);
         }
         return  false;

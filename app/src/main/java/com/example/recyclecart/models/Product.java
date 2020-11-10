@@ -55,7 +55,7 @@ public class Product implements Serializable {
             int g = (int) (minQty*1000);
             return g+"g";
         }
-        return minQty+"kg";
+        return ((int) minQty)+"kg";
     }
 
     @NonNull
@@ -76,5 +76,17 @@ public class Product implements Serializable {
                 .replaceFirst("\\[","")
                 .replaceFirst("]","")
                 .replaceAll(",","\n");
+    }
+
+    public void initWeightBasedProduct(String name, int pricePerkg, float minQty) {
+        type=WEIGHT_BASED;
+        this.name=name;
+        this.pricePerkg=pricePerkg;
+        this.minQty=minQty;
+    }
+
+    public void initVarientBasedProduct(String name) {
+        type=VARIANTS_BASED;
+        this.name=name;
     }
 }
