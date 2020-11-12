@@ -3,25 +3,39 @@ package com.example.recyclecart;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.appcompat.widget.SearchView;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.widget.Toast;
 
 import com.example.recyclecart.databinding.ActivityCatalogBinding;
 import com.example.recyclecart.models.Product;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CatalogActivity extends AppCompatActivity {
 
@@ -38,6 +52,16 @@ public class CatalogActivity extends AppCompatActivity {
     private ProductsAdapter adapter;
     private SearchView searchView;
 
+    // Drag And Drop
+    public boolean isDragOn=false;
+    private ItemTouchHelper itemTouchHelper;
+
+    // SharedPreferences
+    private SharedPreferences mSharedPref;
+    private final String MY_DATA="myData";
+
+
+    /** Options Menu**/
     // Inflating the menu resource
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -60,35 +84,60 @@ public class CatalogActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
-
     // OnItem Click Listener
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Showing the dialog to add new Product
         switch (item.getItemId()){
             case R.id.add_btn:
-                // Showing the dialog to add new Product
                 addProduct();
                 return true;
-            case R.id.weigth_picker:
-                // Weight Picker Dialog
-                WeightPicker.show(CatalogActivity.this, new WeightPicker.OnWeightPickedListener() {
-                    @Override
-                    public void onWeightPicked(int kg, int g) {
-                        Toast.makeText(CatalogActivity.this,"Picked values\n"+kg+" kg and "+g*50+" gm",Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onWeightPickerCancelled() {
-                        Toast.makeText(CatalogActivity.this,"Cancelled!!",Toast.LENGTH_SHORT).show();
-
-                    }
-                });
+            case R.id.dragAndDropBtn:
+                toggleDragAndDropBtn(item);
+                isDragOn = !isDragOn;
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
+
+    /** Drag And Drop**/
+    private void toggleDragAndDropBtn(MenuItem item) {
+        Drawable icon = item.getIcon();
+        if(isDragOn){
+            icon.setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+        }else{
+            icon.setColorFilter(getResources().getColor(R.color.black),PorterDuff.Mode.SRC_ATOP);
+        }
+        item.setIcon(icon);
+        if(isDragOn){
+            itemTouchHelper.attachToRecyclerView(null);
+        } else{
+            itemTouchHelper.attachToRecyclerView(b.recyclerView);
+        }
+    }
+    private void dragAndDropProduct(){
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |
+                ItemTouchHelper.DOWN |
+                ItemTouchHelper.START | ItemTouchHelper.END , 0) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                int fromPosition = viewHolder.getAdapterPosition();
+                int toPosition = target.getAdapterPosition();
+                Collections.swap(adapter.visibleProducts,fromPosition,toPosition);
+                b.recyclerView.getAdapter().notifyItemMoved(fromPosition,toPosition);
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) { }
+
+        };
+        itemTouchHelper = new ItemTouchHelper(simpleCallback);
+    }
+
+
+    /** Contextual Menu**/
     // OnClick handler for ContextualMenu of Product
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item){
@@ -99,10 +148,58 @@ public class CatalogActivity extends AppCompatActivity {
             case R.id.contextualMenuRemove:
                 removeLastSelectedItem();
                 return true;
+            case R.id.weigth_picker:
+                showWeightPickerForWBP(adapter.visibleProducts.get(adapter.lastSelectedItemPosition).type);
+                return true;
         }
         return super.onContextItemSelected(item);
     }
+    // Weight Picker Dialog for weightBased Product
+    private void showWeightPickerForWBP(byte type) {
+        if (type==0){
+            float minQ = adapter.visibleProducts.get(adapter.lastSelectedItemPosition).minQty;
+            final int KG = extractCredentialsFromFloat(minQ).get(0);
+            final int GM = extractCredentialsFromFloat(minQ).get(1);
 
+            WeightPicker.show(CatalogActivity.this, new WeightPicker.OnWeightPickedListener() {
+                @Override
+                public void onWeightPicked(int kg, int g) {
+
+                    Toast.makeText(CatalogActivity.this,"Picked values\n"+kg+" kg and "+g*50+" gm",Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onWeightPickerCancelled() {
+                    Toast.makeText(CatalogActivity.this,"Cancelled!!",Toast.LENGTH_SHORT).show();
+
+                }
+            },adapter,KG,GM);
+        }
+        else{
+            Toast.makeText(CatalogActivity.this,"Not Available for Variant Based Product",Toast.LENGTH_SHORT).show();
+        }
+
+    }
+    private static ArrayList<Integer> extractCredentialsFromFloat(float minQ){
+        ArrayList<Integer> cred = new ArrayList<>();
+        final int KG ,GM;
+        if (minQ<0){
+            KG=0;
+            cred.add(KG);
+            GM=(int)(minQ*1000);
+            cred.add(GM);
+            return cred;
+        }else{
+            KG=(int)(minQ);
+            cred.add(KG);
+            GM=(int)((minQ-KG)*1000);
+            cred.add(GM);
+            return cred;
+        }
+    }
+
+
+    /** Product Editor**/
     // Edit the details of Product
     private void editLastSelectedItem() {
         // Get data to be edited
@@ -131,7 +228,6 @@ public class CatalogActivity extends AppCompatActivity {
                     }
                 });
     }
-
     // Remove the product
     private void removeLastSelectedItem() {
         new AlertDialog.Builder(this)
@@ -151,8 +247,7 @@ public class CatalogActivity extends AppCompatActivity {
                 .setNegativeButton("CANCEL",null)
                 .show();
     }
-
-
+    // Add new product
     private void addProduct() {
         new ProductEditorDialog(ProductEditorDialog.PRODUCT_ADD)
                 .show(this, new Product(), new ProductEditorDialog.OnProductEditedListener() {
@@ -161,6 +256,7 @@ public class CatalogActivity extends AppCompatActivity {
                         adapter.allProducts.add(product);
                         adapter.visibleProducts.add(product);
                         adapter.notifyItemInserted(products.size()-1);
+                        Toast.makeText(CatalogActivity.this,"Item Added!",Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -178,16 +274,49 @@ public class CatalogActivity extends AppCompatActivity {
         b= ActivityCatalogBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
+        loadSavedData();
         setupProductsList();
+
     }
+
+
+    /** Shared Preferences**/
+    private void loadSavedData() {
+        // Try to use sharedPreferences
+        Gson gson = new Gson();
+        mSharedPref = getSharedPreferences("product_data",MODE_PRIVATE);
+        String json =  mSharedPref.getString(MY_DATA,null);
+
+        if(json!=null){
+            products = gson.fromJson(json,new TypeToken<List<Product>>(){}.getType());
+        }
+        else{
+            products = new ArrayList<>();
+        }
+    }
+    // Trying to use SharedPreferences
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        saveData();
+    }
+    /*@Override
+    protected void onPause() {
+        super.onPause();
+    }*/
+    private void saveData() {
+        mSharedPref = getSharedPreferences("product_data",MODE_PRIVATE);
+        Gson gson = new Gson();
+        mSharedPref.edit()
+                .putString(MY_DATA,gson.toJson(adapter.visibleProducts))
+                .apply();
+    }
+
 
     private void setupProductsList() {
         // Create DataSet
-        products = new ArrayList<>(Arrays.asList(
-                new Product("Apple",100,1)
-                ,new Product("Orange",120,2)
-                , new Product("Grapes",60,1)
-        ));
+
+
 
         // Create adapter object
         adapter = new ProductsAdapter(this,products);
@@ -197,5 +326,7 @@ public class CatalogActivity extends AppCompatActivity {
         b.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         b.recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
 
+        // Drag And Drop
+        dragAndDropProduct();
     }
 }

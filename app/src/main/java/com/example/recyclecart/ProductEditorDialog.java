@@ -21,11 +21,14 @@ public class ProductEditorDialog {
     private DialogProductEditBinding b;
     public Product product;
 
+
     public static final byte PRODUCT_ADD =0 , PRODUCT_EDIT =1;
     byte whyProduct;
     public ProductEditorDialog(byte type){
         whyProduct = type;
     }
+
+
 
     void show(final Context context, final Product product, final OnProductEditedListener listener){
 
@@ -61,6 +64,7 @@ public class ProductEditorDialog {
         }
     }
 
+
     // Show previously filled details when Edit button (in contextual Menu) is clicked
     private void preFillPreviousDetails() {
         // Set name
@@ -78,6 +82,7 @@ public class ProductEditorDialog {
             b.variantsEditText.setText(product.variantsString());
         }
     }
+
 
 
     // Set visibility of either Variants or WeightBased
@@ -99,6 +104,8 @@ public class ProductEditorDialog {
             }
         });
     }
+
+
 
     // Check for Product Details Validation
     private boolean areProductDetailsValid(byte type) {
@@ -146,6 +153,8 @@ public class ProductEditorDialog {
         return  false;
     }
 
+
+
     // Return float value of MinQty from string like "12kg" "400g"
     private float extractMinQtyFromString(String minQty) {
 
@@ -156,6 +165,8 @@ public class ProductEditorDialog {
         else
             return Integer.parseInt(minQty.replace("g",""))/1000f;
     }
+
+
 
     // Checks for valid variants
     private boolean areVariantsValid(String variants) {
@@ -173,6 +184,8 @@ public class ProductEditorDialog {
         product.fromVariantStrings(vs);
         return true;
     }
+
+
 
     // Listener Interface to notify Activity of Dialog events
     interface OnProductEditedListener{

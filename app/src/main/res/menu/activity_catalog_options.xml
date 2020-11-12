@@ -16,8 +16,11 @@
         android:orderInCategory="10"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         android:icon="@drawable/ic_search"/>
-
     <item
-        android:title="Weight Picker"
-        android:id="@+id/weigth_picker"/>
+        android:title="Drag And Drop"
+        android:id="@+id/dragAndDropBtn"
+        android:icon="@drawable/ic_drag_and_drop_icon"
+        app:showAsAction="always"
+        android:orderInCategory="25"/>
+
 </menu>

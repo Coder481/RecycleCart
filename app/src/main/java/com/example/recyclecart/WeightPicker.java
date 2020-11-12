@@ -9,6 +9,9 @@ import android.widget.Toast;
 
 import com.example.recyclecart.databinding.WeightPickerDialogBinding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WeightPicker {
     /**
      * There are 9 TODOs in this file, locate them using the window for it given at the bottom.
@@ -18,7 +21,9 @@ public class WeightPicker {
      *          with 2 NumberPickers (for kg & g)
      */
 
-    public static void show(Context context, final OnWeightPickedListener listener){
+    //private  ProductsAdapter adapter;
+
+    public static void show(Context context, final OnWeightPickedListener listener , ProductsAdapter adapter, final int KG, final int GM){
         final WeightPickerDialogBinding b = WeightPickerDialogBinding.inflate(
                 LayoutInflater.from(context)
         );
@@ -33,6 +38,9 @@ public class WeightPicker {
                         int kg ,g;
                         kg=b.numberPickerForKG.getValue();
                         g=b.numberPickerForGm.getValue();
+                        if(kg==KG)
+                            g=g-1;
+
 
                         //TODO 4 : Add GuardCode to prevent user from selecting 0kg 0g. If so, then return
                         if (kg==0 && g==0){return;}
@@ -48,20 +56,24 @@ public class WeightPicker {
                 })
                 .show();
 
-        b.numberPickerForKG.setMinValue(0);
-        b.numberPickerForKG.setMaxValue(10);
-        b.numberPickerForGm.setMaxValue(19);
-        b.numberPickerForGm.setMinValue(0);
-        b.numberPickerForKG.setFormatter(new NumberPicker.Formatter() {
+
+
+        // Setup KG Weight Picker
+        setupKgPicker(b, KG);
+        // Setup GM Weight Picker for MinQty
+        setupGmPickerForMinQty(GM, b);
+
+
+        b.numberPickerForKG.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
-            public String format(int value) {
-                return value+" KG";
-            }
-        });
-        b.numberPickerForGm.setFormatter(new NumberPicker.Formatter() {
-            @Override
-            public String format(int value) {
-                return value*50 + " gm";
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                if(newVal==KG){
+                    // Setup GM Weight Picker for MinQty
+                    setupGmPickerForMinQty(GM, (WeightPickerDialogBinding) b);
+                }else{
+                    // Setup GM Weight Picker
+                    setupGmPicker(b);
+                }
             }
         });
         //setupNumberPickers(context);
@@ -75,6 +87,48 @@ public class WeightPicker {
         //TODO 8 : Test your code :)
 
         //TODO 9 : Try to understand the flow as to how our Listener interface is working
+
+    }
+
+
+
+    // Setup GM Weight Picker for regular GM Weight
+    private static void setupGmPicker(com.example.recyclecart.databinding.WeightPickerDialogBinding b) {
+        b.numberPickerForGm.setMaxValue(19);
+        b.numberPickerForGm.setMinValue(0);
+        b.numberPickerForGm.setFormatter(new NumberPicker.Formatter() {
+            @Override
+            public String format(int value) {
+                return value*50+" gm";
+            }
+        });
+    }
+
+    // Setup KG Weight Picker
+    private static void setupKgPicker(com.example.recyclecart.databinding.WeightPickerDialogBinding b, int KG) {
+        b.numberPickerForKG.setMinValue(KG);
+        b.numberPickerForKG.setMaxValue(10);
+        b.numberPickerForKG.setFormatter(new NumberPicker.Formatter() {
+            @Override
+            public String format(int value) {
+                return value+" KG";
+            }
+        });
+    }
+
+    // Setup GM Weight Picker for MinQty
+    private static void setupGmPickerForMinQty(final int GM, WeightPickerDialogBinding b) {
+        b.numberPickerForGm.setMaxValue(20);
+        b.numberPickerForGm.setMinValue((int) (GM / 50) + 1);
+        b.numberPickerForGm.setFormatter(new NumberPicker.Formatter() {
+            @Override
+            public String format(int value) {
+                if (value == (int) (GM / 50) + 1) {
+                    return GM + " gm";
+                }
+                return (value - 1) * 50 + " gm";
+            }
+        });
     }
 
     /*private static void setupNumberPickers(Context context) {

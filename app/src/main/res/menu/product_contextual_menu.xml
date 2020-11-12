@@ -6,4 +6,7 @@
     <item
         android:id="@+id/contextualMenuRemove"
         android:title="Remove" />
+    <item
+        android:title="Weight Picker"
+        android:id="@+id/weigth_picker"/>
 </menu>
