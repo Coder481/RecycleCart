@@ -7,6 +7,8 @@
 |:----------------:|:----------------:|
 | <img src="https://github.com/Coder481/CDN/blob/main/RecycleCart/v0.4/hmPg.jpg" width="250" height="500"/>| <img src="https://github.com/Coder481/CDN/blob/main/RecycleCart/v0.4/onBack.jpg" width="250" height="500"/>|
 
+### This repo is for admin app, repo for user app is [here](https://github.com/Coder481/EcomUser/tree/ecom_user_v0.3)
+
 ### Task Performed
 * Joining firebase to your app on Android studio
 * Saving data on firebase 
