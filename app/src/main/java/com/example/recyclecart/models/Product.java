@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Product implements Serializable {
-    public static final byte WEIGHT_BASED=0,VARIANTS_BASED=1;
+    public static final int WEIGHT_BASED=0,VARIANTS_BASED=1;
 
-    // Compulsary
+    // Compulsory
     public  String name;
-    public  byte type;
+    public  int type;
 
     // WeightBased
     public int pricePerkg;

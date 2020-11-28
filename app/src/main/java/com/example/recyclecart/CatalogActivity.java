@@ -14,28 +14,26 @@ import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.JsonReader;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.widget.Toast;
 
 import com.example.recyclecart.databinding.ActivityCatalogBinding;
+import com.example.recyclecart.models.Inventory;
 import com.example.recyclecart.models.Product;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CatalogActivity extends AppCompatActivity {
 
@@ -48,7 +46,7 @@ public class CatalogActivity extends AppCompatActivity {
      */
 
     private ActivityCatalogBinding b;
-    private  ArrayList<Product> products;
+    private  List<Product> products;
     private ProductsAdapter adapter;
     private SearchView searchView;
 
@@ -59,6 +57,7 @@ public class CatalogActivity extends AppCompatActivity {
     // SharedPreferences
     private SharedPreferences mSharedPref;
     private final String MY_DATA="myData";
+    private MyApp app;
 
 
     /** Options Menu**/
@@ -155,7 +154,7 @@ public class CatalogActivity extends AppCompatActivity {
         return super.onContextItemSelected(item);
     }
     // Weight Picker Dialog for weightBased Product
-    private void showWeightPickerForWBP(byte type) {
+    private void showWeightPickerForWBP(int type) {
         if (type==0){
             float minQ = adapter.visibleProducts.get(adapter.lastSelectedItemPosition).minQty;
             final int KG = extractCredentialsFromFloat(minQ).get(0);
@@ -274,9 +273,13 @@ public class CatalogActivity extends AppCompatActivity {
         b= ActivityCatalogBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
+        setup();
         loadSavedData();
-        setupProductsList();
 
+    }
+
+    private void setup() {
+        app = (MyApp) getApplicationContext();
     }
 
 
@@ -289,29 +292,105 @@ public class CatalogActivity extends AppCompatActivity {
 
         if(json!=null){
             products = gson.fromJson(json,new TypeToken<List<Product>>(){}.getType());
+            setupProductsList();
         }
         else{
-            products = new ArrayList<>();
+            fetchDataFromCloud();
         }
     }
-    // Trying to use SharedPreferences
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        saveData();
+
+    private void fetchDataFromCloud() {
+        if (app.isOffline()){
+            app.showToast(this,"You are offline. Please check your connection");
+            return;
+        }
+
+        app.showLoadingDialog(this);
+
+        app.db.collection("Inventory").document("Products")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()){
+                            Inventory inventory = documentSnapshot.toObject(Inventory.class);
+                            products = inventory.products;
+                            saveDataLocally();
+                        }
+                        else{
+                            products = new ArrayList<>();
+                        }
+                        setupProductsList();
+                        app.hideLoadingDialog();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        app.showToast(CatalogActivity.this,"Failed to get Data");
+                        app.hideLoadingDialog();
+                    }
+                });
     }
+
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Do you want to save data?")
+                .setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveData();
+                    }
+                }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        }).show();
+    }
+
     /*@Override
-    protected void onPause() {
-        super.onPause();
-    }*/
-    private void saveData() {
+        protected void onPause() {
+            super.onPause();
+        }*/
+    private void saveDataLocally() {
         mSharedPref = getSharedPreferences("product_data",MODE_PRIVATE);
         Gson gson = new Gson();
         mSharedPref.edit()
-                .putString(MY_DATA,gson.toJson(adapter.visibleProducts))
+                .putString(MY_DATA,gson.toJson(adapter.visibleProducts)) //TODO
                 .apply();
     }
 
+    private void saveData(){
+        if (app.isOffline()){
+            app.showToast(this,"Can't save. You are offline!!");
+            return;
+        }
+
+        app.showLoadingDialog(this);
+        Inventory inventory = new Inventory(products);
+
+        app.db.collection("Inventory").document("Products")
+                .set(inventory)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        saveDataLocally();
+                        app.hideLoadingDialog();
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        app.showToast(CatalogActivity.this,"Failed to save data on Cloud");
+                        app.hideLoadingDialog();
+                    }
+                });
+
+    }
 
     private void setupProductsList() {
         // Create DataSet

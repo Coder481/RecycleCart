@@ -23,8 +23,8 @@ public class ProductEditorDialog {
 
 
     public static final byte PRODUCT_ADD =0 , PRODUCT_EDIT =1;
-    byte whyProduct;
-    public ProductEditorDialog(byte type){
+    int whyProduct;
+    public ProductEditorDialog(int type){
         whyProduct = type;
     }
 
@@ -108,7 +108,7 @@ public class ProductEditorDialog {
 
 
     // Check for Product Details Validation
-    private boolean areProductDetailsValid(byte type) {
+    private boolean areProductDetailsValid(int type) {
         // checking for name
         String name = b.name.getText().toString().trim();
         if (name.isEmpty())
