@@ -12,6 +12,7 @@ public class Product implements Serializable {
     // Compulsory
     public  String name;
     public  int type;
+    public float qty;
 
     // WeightBased
     public int pricePerkg;

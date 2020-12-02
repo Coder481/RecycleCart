@@ -22,5 +22,9 @@
         android:icon="@drawable/ic_drag_and_drop_icon"
         app:showAsAction="always"
         android:orderInCategory="25"/>
+    <item
+        android:title="Orders"
+        android:id="@+id/showOrders"
+        app:showAsAction="never"/>
 
 </menu>

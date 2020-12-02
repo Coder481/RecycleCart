@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -23,16 +24,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.widget.Toast;
 
 import com.example.recyclecart.databinding.ActivityCatalogBinding;
+import com.example.recyclecart.models.CartItem;
 import com.example.recyclecart.models.Inventory;
 import com.example.recyclecart.models.Product;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class CatalogActivity extends AppCompatActivity {
@@ -58,6 +65,7 @@ public class CatalogActivity extends AppCompatActivity {
     private SharedPreferences mSharedPref;
     private final String MY_DATA="myData";
     private MyApp app;
+    private CartItem cartItem;
 
 
     /** Options Menu**/
@@ -95,9 +103,17 @@ public class CatalogActivity extends AppCompatActivity {
                 toggleDragAndDropBtn(item);
                 isDragOn = !isDragOn;
                 return true;
+            case R.id.showOrders:
+                moveToOrdersActivity();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void moveToOrdersActivity() {
+        startActivity(new Intent(CatalogActivity.this,OrdersActivity.class));
+    }
+
 
 
     /** Drag And Drop**/
@@ -275,7 +291,12 @@ public class CatalogActivity extends AppCompatActivity {
 
         setup();
         loadSavedData();
+        setupTopic();
 
+    }
+
+    private void setupTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic("users");
     }
 
     private void setup() {
