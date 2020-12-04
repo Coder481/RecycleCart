@@ -296,7 +296,7 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void setupTopic() {
-        FirebaseMessaging.getInstance().subscribeToTopic("users");
+        FirebaseMessaging.getInstance().subscribeToTopic("admin");
     }
 
     private void setup() {

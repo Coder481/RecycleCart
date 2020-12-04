@@ -7,13 +7,14 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/name_textView"
+        android:id="@+id/userId_textView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:visibility="gone"
+        android:text="abc@gmail.com"
+        android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/qty_textView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,28 +26,56 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="TextView"
-        android:visibility="gone"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/id_textView"
-        android:layout_width="0dp"
+    <Button
+        android:id="@+id/deliveredBtn"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text="TextView"
+        android:background="#0F0"
+        android:text="ACCEPT"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.82"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name_textView" />
+        app:layout_constraintTop_toBottomOf="@+id/allOrdersItemsList" />
+
+    <Button
+        android:id="@+id/declineBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="30dp"
+        android:background="#F00"
+        android:text="DECLINE"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@+id/deliveredBtn"
+        app:layout_constraintHorizontal_bias="0.31"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/allOrdersItemsList" />
+
+    <LinearLayout
+        android:id="@+id/allOrdersItemsList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userId_textView"></LinearLayout>
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="#000"
+        android:id="@+id/orderStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textSize="18sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.418"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/id_textView" />
+        app:layout_constraintTop_toBottomOf="@+id/allOrdersItemsList" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
