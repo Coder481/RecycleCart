@@ -411,7 +411,7 @@ public class CatalogActivity extends AppCompatActivity {
         mSharedPref = getSharedPreferences("product_data",MODE_PRIVATE);
         Gson gson = new Gson();
         mSharedPref.edit()
-                .putString(MY_DATA,gson.toJson(adapter.visibleProducts)) //TODO
+                .putString(MY_DATA,gson.toJson(products)) //TODO
                 .apply();
     }
 
