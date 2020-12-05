@@ -5,31 +5,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Adapter;
 
 import com.example.recyclecart.databinding.ActivityOrdersBinding;
-import com.example.recyclecart.databinding.OrdersItemViewBinding;
-import com.example.recyclecart.models.CartItem;
 import com.example.recyclecart.models.Order;
+import com.example.recyclecart.models.Product;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 public class OrdersActivity extends AppCompatActivity {
 
     private ActivityOrdersBinding b;
     private MyApp app;
-    List<Order> orderList = new ArrayList<>();
+
     private OrderItemAdapter adapter;
+    private SharedPreferences mSharedPref;
+    private List<Order> orderList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +70,6 @@ public class OrdersActivity extends AppCompatActivity {
                         app.showToast(OrdersActivity.this,"Error:\n"+e);
                     }
                 });
-
     }
 
     private void setupAdapter() {

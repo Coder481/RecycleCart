@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.example.recyclecart.databinding.ActivityCatalogBinding;
 import com.example.recyclecart.models.CartItem;
 import com.example.recyclecart.models.Inventory;
+import com.example.recyclecart.models.Order;
 import com.example.recyclecart.models.Product;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -66,6 +67,12 @@ public class CatalogActivity extends AppCompatActivity {
     private final String MY_DATA="myData";
     private MyApp app;
     private CartItem cartItem;
+
+
+
+
+
+
 
 
     /** Options Menu**/
@@ -116,6 +123,10 @@ public class CatalogActivity extends AppCompatActivity {
 
 
 
+
+
+
+
     /** Drag And Drop**/
     private void toggleDragAndDropBtn(MenuItem item) {
         Drawable icon = item.getIcon();
@@ -150,6 +161,11 @@ public class CatalogActivity extends AppCompatActivity {
         };
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
     }
+
+
+
+
+
 
 
     /** Contextual Menu**/
@@ -212,6 +228,11 @@ public class CatalogActivity extends AppCompatActivity {
             return cred;
         }
     }
+
+
+
+
+
 
 
     /** Product Editor**/
@@ -281,6 +302,11 @@ public class CatalogActivity extends AppCompatActivity {
                 });
     }
 
+
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -302,6 +328,11 @@ public class CatalogActivity extends AppCompatActivity {
     private void setup() {
         app = (MyApp) getApplicationContext();
     }
+
+
+
+
+
 
 
     /** Shared Preferences**/
